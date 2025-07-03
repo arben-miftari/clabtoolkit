@@ -24,3 +24,6 @@ def main():
         cltqcqa.create_png_webpage_from_generated_slices(
             root_directory=output_folder
         )
+
+if __name__ == "__main__":
+    main()
