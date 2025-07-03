@@ -4,7 +4,6 @@
 #SBATCH --output=/scratch/amiftari/logs/organize_dicom_%j/out_.out
 #SBATCH --error=/scratch/amiftari/logs/organize_dicom_%j/err.err
 #SBATCH --time=1-23:59:00  
-#SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
 
 # Load Python module
