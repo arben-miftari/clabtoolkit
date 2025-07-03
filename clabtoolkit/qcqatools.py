@@ -941,33 +941,75 @@ def generate_image_selection_webpage(
   </style>
   <script>
     function downloadChecked() {{
-      var checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-      var outputLines = [];
-      
-      checkboxes.forEach(function(box) {{
-        outputLines.push(box.value);
+      // Get all checkboxes
+      var allBoxes = document.querySelectorAll('input[type="checkbox"]');
+      var selected = [];
+      var unselected = [];
+
+      allBoxes.forEach(function(box) {{
+        var filename = box.value;
+        var label = box.parentElement.textContent || filename;
+        if (box.checked) {{
+          selected.push(filename);
+        }} else {{
+          unselected.push({{filename: filename, label: label}});
+        }}
       }});
 
-      if (outputLines.length === 0) {{
-        alert('No images selected!');
-        return;
+      // Prompt for justification for each unselected image
+      var justifications = [];
+      var options = ["bad quality", "different contrast", "redundant", "other"];
+      var optionsText = options.map(function(opt, idx) {{ return (idx+1) + ". " + opt; }}).join("\\n");
+
+      for (let i = 0; i < unselected.length; i++) {{
+        var img = unselected[i];
+        var msg = "Unselected image:\\n" + img.label + "\\n\\nChoose justification:\\n" + optionsText + "\\n\\nEnter 1, 2, 3, or 4:";
+        var choice = prompt(msg, "1");
+        if (!choice) continue;
+        var idx = parseInt(choice) - 1;
+        var justification = options[idx] || options[0];
+        if (justification === "other") {{
+          var custom = prompt("Please enter your justification for:\\n" + img.label, "");
+          if (custom && custom.trim() !== "") {{
+            justification = custom.trim();
+          }}
+        }}
+        justifications.push(img.filename + "\\t" + justification);
       }}
 
-      var outputText = outputLines.join("\\n");
-      var blob = new Blob([outputText], {{ type: 'text/plain' }});
-      var url = URL.createObjectURL(blob);
+      // Download unselected justifications
+      if (justifications.length > 0) {{
+        var outputText = justifications.join("\\n");
+        var blob = new Blob([outputText], {{ type: 'text/plain' }});
+        var url = URL.createObjectURL(blob);
 
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = "selected_images.txt";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = "unselected_images_justifications.txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }}
+
+      // Download selected images list
+      if (selected.length > 0) {{
+        var outputText2 = selected.join("\\n");
+        var blob2 = new Blob([outputText2], {{ type: 'text/plain' }});
+        var url2 = URL.createObjectURL(blob2);
+
+        var a2 = document.createElement('a');
+        a2.href = url2;
+        a2.download = "selected_images.txt";
+        document.body.appendChild(a2);
+        a2.click();
+        document.body.removeChild(a2);
+        URL.revokeObjectURL(url2);
+      }}
+
       updateStats();
     }}
-    
+
     function selectAll() {{
       var checkboxes = document.querySelectorAll('input[type="checkbox"]');
       checkboxes.forEach(function(box) {{
@@ -975,7 +1017,7 @@ def generate_image_selection_webpage(
       }});
       updateStats();
     }}
-    
+
     function selectNone() {{
       var checkboxes = document.querySelectorAll('input[type="checkbox"]');
       checkboxes.forEach(function(box) {{
@@ -983,21 +1025,19 @@ def generate_image_selection_webpage(
       }});
       updateStats();
     }}
-    
+
     function updateStats() {{
       var total = document.querySelectorAll('input[type="checkbox"]').length;
       var selected = document.querySelectorAll('input[type="checkbox"]:checked').length;
       document.getElementById('stats').innerHTML = `Selected: ${{selected}} / ${{total}} images`;
     }}
-    
-    // Update stats when checkboxes change
+
     document.addEventListener('change', function(e) {{
       if (e.target.type === 'checkbox') {{
         updateStats();
       }}
     }});
-    
-    // Initialize stats on page load
+
     window.onload = function() {{
       updateStats();
     }};
