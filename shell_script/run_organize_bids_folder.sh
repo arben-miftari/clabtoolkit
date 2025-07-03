@@ -7,11 +7,11 @@
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
 
-# Load Python module (adjust as needed for your cluster)
+# Load Python module
 module load python
 
-# Activate your virtual environment (update the path as needed)
+# Activate virtual environment
 source /work/PRTNR/CHUV/NEURCLIN/gallali/clm/SOFTWARE/ARBEN/python-venv/clabtoolkit-venv/bin/activate
 
-# Run the Python script with input and output directories as arguments
+# Run the Python script with input, output directories, and list of subject ids as arguments
 python organize_bids_folder.py "$1" "$2" "$3"
