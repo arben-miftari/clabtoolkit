@@ -228,7 +228,6 @@ def org_conv_dicoms(
                 try:
                     if booldic:
                         dicom_files = cltmisc.detect_recursive_files(subj_dir)
-                        ses_id = "sub-" + dicom_files[0].split("/")[-3]
                         ses_idprev = []
                         ser_idprev = []
 
@@ -240,6 +239,7 @@ def org_conv_dicoms(
                                 total=n_dics,
                             )
                             for cont_dic, dfiles in enumerate(dicom_files):
+                                ses_id = "ses-" + dfiles.split("/")[-3]
                                 ser_dir = copy_dicom_file(
                                     dfiles,
                                     subj_id,
@@ -281,7 +281,7 @@ def org_conv_dicoms(
                                         dicom_files[i],
                                         subj_id,
                                         out_dic_dir,
-                                        ses_id,
+                                        "ses-" + Path(dicom_files[i]).parent.parent.name,
                                         date_times,
                                         demobool,
                                         subTB,
