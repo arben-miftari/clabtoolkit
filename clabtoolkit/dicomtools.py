@@ -228,6 +228,7 @@ def org_conv_dicoms(
                 try:
                     if booldic:
                         dicom_files = cltmisc.detect_recursive_files(subj_dir)
+                        ses_id = "sub-" + dicom_files[0].split("/")[-3]
                         ses_idprev = []
                         ser_idprev = []
 
@@ -381,63 +382,46 @@ def copy_dicom_file(
 
 
     """
-
     try:
         dataset = pydicom.dcmread(dic_file)
         dic_path = os.path.dirname(dic_file)
         dic_name = os.path.basename(dic_file)
 
-        # Extracting the study date from DICOM file
-        attributes = dataset.dir("")
-
-        if attributes:
-            sdate = dataset.data_element("StudyDate").value
-            stime = dataset.data_element("StudyTime").value
-            year = int(sdate[:4])
-            month = int(sdate[4:6])
-            day = int(sdate[6:8])
-
-            # Date format
-            sdate_time = datetime(day=day, month=month, year=year)
-
-            # Creating default current Session ID
-            ses_id, ser_id = create_session_series_names(dataset)
-
-            if not ses_id == None:
-                ses_id = "ses-" + ses_id
-
-            if "000000" in ses_id and ser_id in ser_idprev:
-                ses_id = ses_idprev
-
-            # visitId = dfiles.split('/')[8].split('-')[1]
-            # ses_id = 'ses-'+ visitId
-
-            ses_idprev = ses_id
-            ser_idprev = ser_id
-
-            # Changing the session Id in case we have access to the demographics file
-            if demogbool:
-                timediff = np.array(date_times) - np.array(sdate_time)
-                clostd = np.argmin(abs(timediff))
-                visitVar = demog_tab.iloc[clostd]["session_id"]
-                ses_id = ses_id + visitVar
-
-            dest_dic_dir = os.path.join(out_dic_dir, subj_id, ses_id, ser_id)
-
-            # Create the destination path
-            if not os.path.isdir(dest_dic_dir):
-                path = Path(dest_dic_dir)
-                path.mkdir(parents=True, exist_ok=True)
-            #                     print(newPath)
-            dest_dic = os.path.join(dest_dic_dir, dic_name)
-            if force:
-                if os.path.isfile(dest_dic):
-                    os.remove(dest_dic)
-                else:
-                    copyfile(dic_file, dest_dic)
+        # If ses_id is not provided, extract from DICOM
+        if ses_id is None:
+            attributes = dataset.dir("")
+            if attributes:
+                ses_id, ser_id = create_session_series_names(dataset)
+                if not ses_id == None:
+                    ses_id = "ses-" + ses_id
+                if "000000" in ses_id and ser_id in ser_idprev:
+                    ses_id = ses_idprev
+                ses_idprev = ses_id
+                ser_idprev = ser_id
             else:
-                if not os.path.isfile(dest_dic):
-                    copyfile(dic_file, dest_dic)
+                ses_id = "ses-unknown"
+                ser_id = "series-unknown"
+        else:
+            # Use provided ses_id and extract series from DICOM
+            attributes = dataset.dir("")
+            if attributes:
+                _, ser_id = create_session_series_names(dataset)
+            else:
+                ser_id = "series-unknown"
+
+        dest_dic_dir = os.path.join(out_dic_dir, subj_id, ses_id, ser_id)
+
+        if not os.path.isdir(dest_dic_dir):
+            path = Path(dest_dic_dir)
+            path.mkdir(parents=True, exist_ok=True)
+        dest_dic = os.path.join(dest_dic_dir, dic_name)
+        if force:
+            if os.path.isfile(dest_dic):
+                os.remove(dest_dic)
+            copyfile(dic_file, dest_dic)
+        else:
+            if not os.path.isfile(dest_dic):
+                copyfile(dic_file, dest_dic)
 
     except pydicom.errors.InvalidDicomError:
         print("Error at file at path :  " + dic_file)

@@ -1873,7 +1873,8 @@ def detect_recursive_files(in_dir):
     # r=root, d=directories, f = files
     for r, d, f in os.walk(in_dir):
         for file in f:
-            files.append(os.path.join(r, file))
+            if not file.startswith("."):
+                files.append(os.path.join(r, file))
 
     return files
 

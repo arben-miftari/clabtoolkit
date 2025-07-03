@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+/personal_test
 
 # C extensions
 *.so
