@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --partition=cpu
 #SBATCH --job-name=organize_dicom
-#SBATCH --output=/scratch/amiftari/logs/organize_dicom_%j/out.out
-#SBATCH --error=/scratch/amiftari/logs/organize_dicom_%j/err.err
+#SBATCH --output=/scratch/amiftari/logs/organize_dicom/out_%j.out
+#SBATCH --error=/scratch/amiftari/logs/organize_dicom/err_%j.err
 #SBATCH --time=1-23:59:00  
 #SBATCH --cpus-per-task=1
 
