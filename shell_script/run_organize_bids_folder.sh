@@ -14,4 +14,4 @@ module load python
 source /work/PRTNR/CHUV/NEURCLIN/gallali/clm/SOFTWARE/ARBEN/python-venv/clabtoolkit-venv/bin/activate
 
 # Run the Python script with input and output directories as arguments
-python python_scripts/organize_dicom_folder.py "$1" "$2"
+python python_scripts/organize_dicom_folder.py "$1" "$2" "$3"
